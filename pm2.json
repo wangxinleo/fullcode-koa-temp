@@ -1,0 +1,20 @@
+{
+  "apps": [
+    {
+      "name": "ERP2CRM",
+      "script": "./bin/www",
+      "args": [
+        "-p",
+        "80"
+      ],
+      "merge_logs": true,
+      "cwd": "./",
+      "log_file": "./log/combined.outerr.log",
+      "out_file": "./log/out.log",
+      "error_file": "./log/err.log",
+      "env": {
+        "PORT": "80"
+      }
+    }
+  ]
+}
