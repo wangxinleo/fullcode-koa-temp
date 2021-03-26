@@ -1,5 +1,6 @@
 const { connectionTimeout, requestTimeout, enableArithAbort, pool_max, idleTimeoutMillis } = require('./index');
 // MSSQL配置信息
+// TODO:分布式数据库和普通数据库要区别开来
 let config = {
   db01: {
     area: "数据库1",

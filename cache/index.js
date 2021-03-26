@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const {cacheEffeTime} = require('../config')
+const { cacheEffeTime } = require('../config');
 
 /**
  *  写入缓存
@@ -24,7 +24,7 @@ const writeCache = (cachePath, obj, body) => {
   FileData[key] = body;
   fs.writeFile(cachePath, JSON.stringify(FileData), 'utf8', err => {
     if (err) {
-      throw('writeError');
+      throw ('writeError');
     }
   });
 };

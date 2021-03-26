@@ -1,4 +1,4 @@
-const {area_hash} = require("../config");
+const { area_hash } = require("../config");
 
 /**
  * 针对对象某一属性进行排序，asc正序，desc反序
@@ -78,7 +78,7 @@ const checkReq = (arr, req) => {
  */
 const copyVal = (item1, item2) => {
   return item1 ? item1 : item2;
-}
+};
 /**
  * 取出请求中的字段，组装SQL 的类型定义
  * @param obj 形如{'key': ['type','default]}的对象
@@ -152,14 +152,14 @@ const updateSql = (obj, req, neglectArr = []) => {
     sqlVal += `${key} = @${key},\n`;
   });
   return sqlVal.substring(0, sqlVal.lastIndexOf(','));
-}
+};
 /**
  * 有默认值变量在没有值的情况下赋予默认值
  * @param obj 形如{'key': ['type','default]}的对象
  * @param req 请求参数对象
  * @constructor
  */
-const NodataTodefault = (obj, req) => {
+const Nodata2default = (obj, req) => {
   // const temp = obj.filter((el)=>{return el[2] !== undefined})
   Object.keys(obj).forEach(key => {
     if (obj[key][1] !== undefined && req[key] === undefined) {
@@ -177,7 +177,7 @@ module.exports = {
   postSqlSet,
   insertSqlKey,
   insertSqlVal,
-  NodataTodefault,
+  Nodata2default,
   copyVal,
   updateSql
 };

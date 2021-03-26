@@ -1,17 +1,15 @@
 const request = require('request');
 
 /**
- * 删除CRM派工系统的失效的派工记录
+ * 向第三方接口get请求
  * @param url
  * @param PartNumber
  * @returns {Promise<object>}
  */
-const deleteWaitDispatchByPartNumber = (url, PartNumber) => {
-
+const get2others = (url, PartNumber) => {
   return new Promise(resolve => {
     request(url, function (error, response) {
       if (!error || response.statusCode === 200) {
-        console.log(`删除CRM数据库 - ${PartNumber}`);
         resolve(response);
       }
     });
@@ -20,13 +18,13 @@ const deleteWaitDispatchByPartNumber = (url, PartNumber) => {
 };
 
 /**
- * 推送派工信息到crm
+ * 向第三方接口post请求
  * @param url
  * @param requestData
  * @returns {Promise<object>}
  * @constructor
  */
-const PostWaitDispatch = (url, requestData) => {
+const post2others = (url, requestData) => {
 
   return new Promise((resolve) => {
     request({
@@ -46,21 +44,7 @@ const PostWaitDispatch = (url, requestData) => {
 
 };
 
-const GetExistedUid = (url) => {
-  return new Promise((resolve, reject) => {
-    request(url, function (error, response) {
-      if (response.body === 'True') {
-        resolve(true)
-      } else {
-        reject(new Error('authorityError'))
-      }
-    })
-  })
-}
-
-
 module.exports = {
-  deleteWaitDispatchByPartNumber,
-  PostWaitDispatch,
-  GetExistedUid
+  get2others,
+  post2others
 };
