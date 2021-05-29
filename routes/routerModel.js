@@ -4,9 +4,8 @@
  *
  */
 const router = require('koa-router')();
-const tb = require("../config/table.config");
 
-const {apiPrePath} = require('../config')
+const { apiPrePath } = require('../config');
 const {
   strToArr,
   checkReq,
@@ -18,7 +17,7 @@ const {
   copyVal,
   insertSqlVal
 } = require("../utils");
-const {Select_SQL, Trans_SQL} = require('../utils/dbMiddleware');
+const { Select_SQL, Trans_SQL } = require('../utils/dbMiddleware');
 
 // 如果复制本文件，请把routerModel改成跟文件名一致；
 // 例如：index.js 则 router.prefix(apiPrePath + 'index');
@@ -31,7 +30,7 @@ router.get('/getTest', async (ctx) => {
   // 1.取得query数据
   //
   // 例如：/getTest？num1=1&num2=2&AREA_CODE=dgyb,dgrb
-  let {num1, num2, AREA_CODE} = ctx.query;
+  let { num1, num2, AREA_CODE } = ctx.query;
 
   // 2.校验必填项，如果不需要检验必填则忽略下方代码；
   //
@@ -125,62 +124,7 @@ router.put('/updateTest', async (ctx) => {
   let area = strToArr(req_body.AREA_CODE);
 
   // 5.拼接sql语句
-  //
-  // 字符串中可以使用 ${   } 使用某些变量中存储的str数据；例如：${CUST_CODE}
-  //
-  // ${   } 也可以使用三元运算符；
-  // 例如 ${BOOL_ALL === 'true' ? '' : 'top 1'}
-  // 如果BOOL_ALL为真则 返回字符串 ''，为假则返回 ‘top 1’
 
-  // postSqlType()方法：
-  // 可以将body的参数与需要写入的table对象做对比，
-  // 如果body的参数是table表的字段，
-  // 则拼接成sql 中的定义语句
-
-  // postSqlSet()方法：
-  // 可以将body的参数与需要写入的table对象做对比，
-  // 如果body的参数是table表的字段，
-  // 则拼接成sql 中的set语句
-
-  // updateSql()方法：
-  // 可以将body的参数与需要写入的table对象做对比，
-  // 如果body的参数是table表的字段，
-  // 则拼接成sql 中的update语句；
-  // 支持传入一个不需要赋值的数组，可以在赋值时忽略掉指定字段
-  const sql1 = `
-    declare
-    @SALES_REP_PTR int,
-    ${postSqlType({'EMPL_CODE': ['varchar(20)']}, req_body)},
-    ${postSqlType(tb.D0010Tpye, req_body)},
-    @LAST_UPDT datetime
-
-    ${postSqlSet({'EMPL_CODE': ['varchar(20)']}, req_body)}
-    ${postSqlSet(tb.D0010Tpye, req_body)}
-    set @LAST_UPDT = getdate()
-
-    select @SALES_REP_PTR=rkey from  data0005 where EMPL_CODE=@EMPL_CODE
-
-    update Data0010_test set
-         SALES_REP_PTR = @SALES_REP_PTR,
-         LAST_UPDT = @LAST_UPDT,
-         ${updateSql(tb.D0010Tpye, req_body, ['CUST_CODE'])}
-    where CUST_CODE = @CUST_CODE
-  `;
-  const sql2 = `
-    declare
-    @CUSTOMER_PTR int,
-    ${postSqlType({'CUST_CODE': ['varchar(10)']}, req_body)},
-    ${postSqlType(tb.D0012Tpye, req_body)}
-
-    ${postSqlSet({'CUST_CODE': ['varchar(10)']}, req_body)}
-    ${postSqlSet(tb.D0012Tpye, req_body)}
-    
-    select @CUSTOMER_PTR=rkey from  data0010_test where  CUST_CODE=@CUST_CODE
-
-    update Data0012_test set 
-      ${updateSql(tb.D0012Tpye, req_body)}
-    where CUSTOMER_PTR = @CUSTOMER_PTR
-  `
 
   // 6.执行sql事务，错误时回滚，并报错
   //
@@ -206,7 +150,7 @@ router.post('/addTest', async (ctx) => {
   // 2.设置默认值
   //
   // 在许多表数据中，会有许多不想传数据，要使用默认值的情况，
-  // config/table.config.js 中的配置文件设置了默认值的字段则会自动在body数据中添加默认值。
+
   NodataTodefault(tb.D0010Tpye, req_body);
   NodataTodefault(tb.D0012Tpye, req_body);
 
@@ -221,19 +165,19 @@ router.post('/addTest', async (ctx) => {
   // 在对多数据表插值时，有可能他01表中有city字段，02表有city02字段，但是他们的值是一样的
   // 这个时候就要利用以下方法对一些相同value的字段进行赋值，这样就不需要前端多传很多相同的数据。
   // --公司全称
-  req_body.LOCNAME_FOR_FORM = copyVal(req_body.LOCNAME_FOR_FORM, req_body.CUSTOMER_NAME)
+  req_body.LOCNAME_FOR_FORM = copyVal(req_body.LOCNAME_FOR_FORM, req_body.CUSTOMER_NAME);
   //  -- 公司地址
-  req_body.SHP_ADDR1_FOR_FORM = copyVal(req_body.SHP_ADDR1_FOR_FORM, req_body.SHIP_TO_ADDRESS_1)
+  req_body.SHP_ADDR1_FOR_FORM = copyVal(req_body.SHP_ADDR1_FOR_FORM, req_body.SHIP_TO_ADDRESS_1);
   // -- 联系电话
-  req_body.S4_BARCODE_LABLE = copyVal(req_body.S4_BARCODE_LABLE, req_body.SHIP_TO_PHONE)
+  req_body.S4_BARCODE_LABLE = copyVal(req_body.S4_BARCODE_LABLE, req_body.SHIP_TO_PHONE);
   //-- 联系人
-  req_body.S3_BARCODE_LABLE = copyVal(req_body.S3_BARCODE_LABLE, req_body.SHIP_TO_CONTACT)
+  req_body.S3_BARCODE_LABLE = copyVal(req_body.S3_BARCODE_LABLE, req_body.SHIP_TO_CONTACT);
   //-- 装箱单
-  req_body.overship_flag = copyVal(req_body.overship_flag, req_body.APPLY_IN_TRANSIT)
+  req_body.overship_flag = copyVal(req_body.overship_flag, req_body.APPLY_IN_TRANSIT);
   // 城市
-  req_body.LOCATION = copyVal(req_body.LOCATION, req_body.STATE)
+  req_body.LOCATION = copyVal(req_body.LOCATION, req_body.STATE);
   // 网址
-  req_body.SHIP_TO_ADDRESS_2 = copyVal(req_body.SHIP_TO_ADDRESS_2, req_body.BILLING_ADDRESS_2)
+  req_body.SHIP_TO_ADDRESS_2 = copyVal(req_body.SHIP_TO_ADDRESS_2, req_body.BILLING_ADDRESS_2);
 
 
   // 5.验证数据规范
@@ -259,77 +203,6 @@ router.post('/addTest', async (ctx) => {
   let area = strToArr(req_body.AREA_CODE);
 
 
-  // 7.拼接sql语句
-  //
-  // 字符串中可以使用 ${   } 使用某些变量中存储的str数据；例如：${CUST_CODE}
-  //
-  // ${   } 也可以使用三元运算符；
-  // 例如 ${BOOL_ALL === 'true' ? '' : 'top 1'}
-  // 如果BOOL_ALL为真则 返回字符串 ''，为假则返回 ‘top 1’
-
-  // postSqlType()方法：
-  // 可以将body的参数与需要写入的table对象做对比，
-  // 如果body的参数是table表的字段，
-  // 则拼接成sql 中的定义语句
-
-  // postSqlSet()方法：
-  // 可以将body的参数与需要写入的table对象做对比，
-  // 如果body的参数是table表的字段，
-  // 则拼接成sql 中的set语句
-
-  // insertSqlKey()方法：
-  // 可以将body的参数与需要写入的table对象做对比，
-  // 如果body的参数是table表的字段，
-  // 则拼接成sql insert 中的key；
-
-  // insertSqlVal()方法：
-  // 可以将body的参数与需要写入的table对象做对比，
-  // 如果body的参数是table表的字段，
-  // 则拼接成sql insert 中的value引用；
-
-  const sql1 = `
-    declare
-    @SALES_REP_PTR int,
-    @LAST_UPDT datetime,
-    ${postSqlType({'EMPL_CODE': ['varchar(20)']}, req_body)},
-    ${postSqlType(tb.D0010Tpye, req_body)}
-    
-    set @LAST_UPDT = getdate()
-    ${postSqlSet({'EMPL_CODE': ['varchar(20)']}, req_body)}
-    ${postSqlSet(tb.D0010Tpye, req_body)}
-    
-    select @SALES_REP_PTR=rkey from  data0005 where EMPL_CODE=@EMPL_CODE
-    
-    INSERT INTO Data0010_test (
-      SALES_REP_PTR,
-      LAST_UPDT,
-      ${insertSqlKey(tb.D0010Tpye, req_body)}
-    ) VALUES (
-      @SALES_REP_PTR,
-      @LAST_UPDT,
-      ${insertSqlVal(tb.D0010Tpye, req_body)}
-    )
-  `;
-  const sql2 = `
-      declare
-    @CUSTOMER_PTR int,
-    ${postSqlType({'CUST_CODE': ['varchar(20)']}, req_body)},
-    ${postSqlType(tb.D0012Tpye, req_body)}
-    
-    ${postSqlSet({'CUST_CODE': ['varchar(20)']}, req_body)}
-    ${postSqlSet(tb.D0012Tpye, req_body)}
-    
-    select @CUSTOMER_PTR=rkey from  data0010_test1 where  CUST_CODE=@CUST_CODE
-    
-    INSERT INTO Data0012_test (
-      CUSTOMER_PTR,
-      ${insertSqlKey(tb.D0012Tpye, req_body)}
-    ) VALUES (
-      @CUSTOMER_PTR,
-      ${insertSqlVal(tb.D0012Tpye, req_body)}
-    )
-  `;
-
   // 8.执行sql事务，错误时回滚，并报错
   //
   // area 地区代号
@@ -349,7 +222,7 @@ router.post('/addTest', async (ctx) => {
  */
 router.delete('/deleteTest', async (ctx) => {
   // 1.取得body数据
-  let {ID, AREA_CODE} = ctx.request.body;
+  let { ID, AREA_CODE } = ctx.request.body;
 
   // 2.校验必填项，如果不需要检验必填则忽略下方代码；
   //
@@ -367,7 +240,7 @@ router.delete('/deleteTest', async (ctx) => {
 
   const sql = `
     DELETE FROM table01 WHERE key = '${ID}' 
-  `
+  `;
 
   // 4.执行sql事务，错误时回滚，并报错
   //
@@ -381,6 +254,6 @@ router.delete('/deleteTest', async (ctx) => {
     status: 204,
     msg: '用户删除数据成功'
   };
-})
+});
 
 module.exports = router;

@@ -1,26 +1,48 @@
 const mssql = require('mssql');
+const mysql2 = require('mysql2');
 const async = require('async');
-const {promisify} = require('util')
-const {config, deploy} = require('../config/database.config');
+const { promisify } = require('util');
+const series = promisify(async.series);
 
-const series = promisify(async.series)
+// 载入配置
+const configInit = (config, deploy) => {
+  Object.keys(config).forEach(key => {
+    Object.assign(config[key], deploy);
+  });
+  return config;
+};
 /**
- * 创建连接池
+ * MSSQL初始化连接
+ * @param config 数据库配置
+ * @returns {{}}
+ */
+const mssqlInit = (config) => {
+  const db = {};
+  Object.keys(config).forEach(key => {
+    // 创建连接池并获取连接方法
+    db[key] = mssqlConnection(mssqlCreatPool(config[key]));
+    db[key + '_Trans'] = mssqlTransaction(mssqlCreatPool(config[key]));
+  });
+  return db;
+};
+
+/**
+ * MSSQL创建连接池
  * @param config 数据库配置文件
  * @returns {ConnectionPool}
  */
-const creatPool = (config) => {
+const mssqlCreatPool = (config) => {
   return new mssql.ConnectionPool(config, err => {
-    if (err) console.log('连接池初始化失败,将会在使用时再次连接')
+    if (err) console.log('连接池初始化失败,将会在使用时再次连接');
   });
 };
 
 /**
- * 创建连接
+ * MSSQL创建连接
  * @param con 连接池
  * @returns {function(*=): Promise<>}
  */
-const goConnection = (con) => {
+const mssqlConnection = (con) => {
   return async (sql) => {
     await con.connect();
     try {
@@ -35,11 +57,11 @@ const goConnection = (con) => {
 };
 
 /**
- * 创建事务
+ * MSSQL创建事务
  * @param con 连接池
  * @returns {function(...[*]): Promise<>}
  */
-const dbTransaction = (con) => {
+const mssqlTransaction = (con) => {
   return async (...sql) => {
     await con.connect();
     const transaction = new mssql.Transaction(con);
@@ -64,17 +86,17 @@ const dbTransaction = (con) => {
     let queryArr = [];
 
     sql.forEach(value => {
-      queryArr.push((callback)=>{
-          request.query(value, (err, res) => {
-            if (err) {
-              console.log('语句错误--'+err);
-              callback(err,null)
-            }else {
-              callback(null,res)
-            }
-          })
-        }
-      )
+      queryArr.push((callback) => {
+        request.query(value, (err, res) => {
+          if (err) {
+            console.log('语句错误--' + err);
+            callback(err, null);
+          } else {
+            callback(null, res);
+          }
+        });
+      }
+      );
     });
     return series(queryArr).then(res => {
       return new Promise(resolve => {
@@ -87,8 +109,8 @@ const dbTransaction = (con) => {
           }
           console.log('提交成功');
         });
-        resolve(res)
-      })
+        resolve(res);
+      });
     }).catch(err => {
       return new Promise((resolve, reject) => {
         console.log('出现错误,执行回滚');
@@ -99,45 +121,23 @@ const dbTransaction = (con) => {
             } else {
               console.log('回滚成功');
             }
-          })
+          });
         }
-        reject(err)
-      })
-    })
+        reject(err);
+      });
+    });
 
   };
 };
 
-// 载入配置
-const configInit = () => {
-  Object.keys(config).forEach(key => {
-    Object.assign(config[key], deploy);
-  });
-  return config;
-};
-/**
- * 初始化连接
- * @param config 数据库配置
- * @returns {{}}
- */
-const dbInit = (config) => {
-  const db = {};
-  Object.keys(config).forEach(key => {
-    // 创建连接池并获取连接方法
-    db[key] = goConnection(creatPool(config[key]));
-    db[key + '_Trans'] = dbTransaction(creatPool(config[key]));
-  });
-  return db;
-};
+// // 现有数据库集合
+// let keys = [];
+// // 获取现有数据库集合
+// function db_keys () {
+//   Object.keys(config).forEach(key => {
+//     keys.push(key);
+//   });
+// }
 
-// 现有数据库集合
-let keys = [];
-// 获取现有数据库集合
-function db_keys(){
-  Object.keys(config).forEach(key => {
-    keys.push(key);
-  });
-}
-
-db_keys()
-module.exports = {configInit, dbInit, keys};
+db_keys();
+module.exports = { configInit, mssqlInit, keys };

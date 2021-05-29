@@ -1,6 +1,4 @@
-const db = require('../database/db');
-const {keys} = require('../database/database.function');
-const {config} = require('../config/database.config')
+const { mssql_db } = require('../database/db');
 
 /**
  * 组合查询方法，根据区域或全区域查询数据库，返回结果Objvarect对象。
@@ -9,7 +7,7 @@ const {config} = require('../config/database.config')
  * @returns {Promise<{area: string, total: number, data: *[]}|{area: string, total: number, data: []}>}
  * @constructor
  */
-const Select_SQL = async (area, sql) => {
+const Select_SQL = async (keys, area, sql) => {
   // area 类型判定
   if (Object.prototype.toString.call(area) !== '[object Array]') {
     return {
@@ -19,23 +17,21 @@ const Select_SQL = async (area, sql) => {
     };
   }
 
-  let dataAll = {}
+  let dataAll = {};
   let data = [];
   let res_area = '';
   for (let item of area) {
     if (keys.indexOf(item) !== -1) {
-      dataAll[item] = await db[item](sql).then(res => {
+      dataAll[item] = await mssql_db[item](sql).then(res => {
         !res.recordset ? res.recordset = [] : "";
         if (res.recordset.length === 0) {
           return {
             total: 0,
-            area: `${config[item].area}(无数据)`,
             data: []
           };
         }
         return {
           total: res.recordsets[0][0].total,
-          area: config[item].area,
           data: res.recordsets[0]
         };
       }).catch(err => {
@@ -43,24 +39,22 @@ const Select_SQL = async (area, sql) => {
         if (err.code === 'ETIMEOUT') {
           return {
             total: 0,
-            area: `${config[item].area}(连接超时)`,
             data: []
           };
         } else {
           return {
             total: 0,
-            area: `${config[item].area}(错误)`,
             data: []
           };
         }
-      })
+      });
     }
   }
 
   Object.keys(dataAll).forEach(key => {
-    data = data.concat(dataAll[key].data)
-    res_area += `${dataAll[key].area},`
-  })
+    data = data.concat(dataAll[key].data);
+    res_area += `${dataAll[key].area},`;
+  });
   let res_area_arr = res_area.split(',');
   res_area_arr = res_area_arr.filter(item => item);
   res_area = res_area_arr.join(',');
@@ -85,15 +79,15 @@ const Select_SQL = async (area, sql) => {
 const Trans_SQL = async (area, ...sql) => {
   // area 类型判定
   if (Object.prototype.toString.call(area) !== '[object Array]') {
-    throw new Error('AREAError')
+    throw new Error('AREAError');
   }
 
   for (let item of area) {
-    await db[item + '_Trans'](...sql).then().catch(() => {
-      throw new Error('RequestDataError')
-    })
+    await mssql_db[item + '_Trans'](...sql).then().catch(() => {
+      throw new Error('RequestDataError');
+    });
   }
 
-}
+};
 
-module.exports = {Select_SQL, Trans_SQL};
+module.exports = { Select_SQL, Trans_SQL };

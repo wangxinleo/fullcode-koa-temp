@@ -1,7 +1,6 @@
 const { connectionTimeout, requestTimeout, enableArithAbort, pool_max, idleTimeoutMillis } = require('./index');
 // MSSQL配置信息
-// TODO:分布式数据库和普通数据库要区别开来
-let config = {
+const MSSQLConfig = {
   db01: {
     area: "数据库1",
     user: "user",
@@ -20,8 +19,8 @@ let config = {
   }
 };
 
-// 数据库设置参数（无必要情况勿动）
-const deploy = {
+// MSSQL数据库设置参数
+const MSSQLDeploy = {
   connectionTimeout: connectionTimeout,
   requestTimeout: requestTimeout,
   options: {
@@ -35,4 +34,19 @@ const deploy = {
   },
 };
 
-module.exports = { config, deploy };
+// MYSQL配置信息
+const MYSQLConfig = {
+  db03: {
+    host: 'localhost',
+    database: 'test',
+    user: 'root',
+    password: 'root'
+  }
+};
+// MySQL数据库设置参数
+const MYSQLDeploy = {
+  connectionLimit: 5
+};
+
+
+module.exports = { MSSQLConfig, MSSQLDeploy, MYSQLConfig, MYSQLDeploy };
