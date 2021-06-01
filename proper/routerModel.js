@@ -17,7 +17,6 @@ const {
   copyVal,
   insertSqlVal
 } = require("../utils");
-const { Select_SQL, Trans_SQL } = require('../utils/dbMiddleware');
 
 // 如果复制本文件，请把routerModel改成跟文件名一致；
 // 例如：index.js 则 router.prefix(apiPrePath + 'index');

@@ -37,10 +37,10 @@ const MSSQLDeploy = {
 // MYSQL配置信息
 const MYSQLConfig = {
   db03: {
-    host: '120.2.1.3',
+    host: '49.232.48.54',
     database: 'fullcode',
     user: 'fullcode',
-    password: '8888'
+    password: 'xSiDWK2jfw6476Rw'
   }
 };
 // MySQL数据库设置参数

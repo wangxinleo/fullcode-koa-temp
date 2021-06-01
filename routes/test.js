@@ -10,9 +10,12 @@ router.get('/getTest', async (ctx) => {
 	if (!name) ctx.throw('RequestDataError');
 
 	const sql = `
-		select * from fullcodeTest where name = ?
+	select * from fullcodeTest where name = ?
   `;
-	const res = await mysql_db.db03(sql, [name]);
+	const sql2 = `
+	select * from fullcodeTest
+`;
+	const res = await Promise.all([mysql_db.db03(sql, [name]), mysql_db.db03(sql2, [])]);
 	// console.log(mysql_db.db03.toString());
 
 	return ctx.body = {
