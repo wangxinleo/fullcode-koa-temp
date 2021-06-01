@@ -20,8 +20,16 @@ const mssqlInit = (config) => {
   const db = {};
   Object.keys(config).forEach(key => {
     // 创建连接池并获取连接方法
-    db[key] = mssqlConnection(mssqlCreatPool(config[key]));
-    db[key + '_Trans'] = mssqlTransaction(mssqlCreatPool(config[key]));
+    db[key] = mssqlConnection(mssqlCreatePool(config[key]));
+    db[key + '_Trans'] = mssqlTransaction(mssqlCreatePool(config[key]));
+  });
+  return db;
+};
+
+const mysqlInit = (config) => {
+  const db = {};
+  Object.keys(config).forEach(key => {
+    db[key] = mysqlConnection(mysqlCreatePool(config[key]));
   });
   return db;
 };
@@ -31,10 +39,14 @@ const mssqlInit = (config) => {
  * @param config 数据库配置文件
  * @returns {ConnectionPool}
  */
-const mssqlCreatPool = (config) => {
+const mssqlCreatePool = (config) => {
   return new mssql.ConnectionPool(config, err => {
-    if (err) console.log('连接池初始化失败,将会在使用时再次连接');
+    if (err) console.log('pool首次连接超时,将会在使用时再次连接');
   });
+};
+
+const mysqlCreatePool = (config) => {
+  return mysql2.createPool(config);
 };
 
 /**
@@ -53,6 +65,18 @@ const mssqlConnection = (con) => {
         reject(e);
       });
     }
+  };
+};
+
+const mysqlConnection = (con) => {
+  return async (sql, arrParam) => {
+    return await con.promise().execute(sql, arrParam).then(([res]) => {
+      console.log(res);
+      return res;
+    }).catch(err => {
+      console.log(`err:` + err);
+      return err;
+    });
   };
 };
 
@@ -139,5 +163,5 @@ const mssqlTransaction = (con) => {
 //   });
 // }
 
-db_keys();
-module.exports = { configInit, mssqlInit, keys };
+// db_keys();
+module.exports = { configInit, mssqlInit, mysqlInit };

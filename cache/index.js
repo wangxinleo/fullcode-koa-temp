@@ -11,7 +11,7 @@ const { cacheEffeTime } = require('../config');
  */
 const writeCache = (cachePath, obj, body) => {
   // 有错误、超时，无数据时不写入
-  if (!body || body.status !== 200 || body.area.indexOf('错误') !== -1 || body.area.indexOf('超时') !== -1) {
+  if (!body || body.status !== 200) {
     return false;
   }
   // 拼接参数作为缓存key

@@ -29,7 +29,7 @@ module.exports = {
    */
 
   // 是否启用缓存功能
-  cacheFeatures: true,
+  cacheFeatures: false,
   // 缓存有效时间(分钟)
   cacheEffeTime: 10,
 
